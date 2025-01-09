@@ -28,3 +28,9 @@ class sample_code:
             cls.cached_value = file.read()
         cls.file_opened = True
         return cls.cached_value
+
+    example_program = """
+#include
+using namespace std;
+int main(){return 0;}
+""".replace("\n", "")
