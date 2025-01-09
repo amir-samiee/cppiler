@@ -1,5 +1,5 @@
 start: s n m
-s: "#include" s | 
+s: "#include <reservedword>" s | 
 n: "using namespace std;" | 
 m: "int main(){" t v "}"
 t: id t | l t | loop t | input t | output t | 
