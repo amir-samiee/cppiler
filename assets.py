@@ -1,6 +1,12 @@
 from enum import Enum, auto
 SAMPLE_CODE_FILE_PATH = "test.cpp"
 
+def add_if_not_already_added(element,d):
+    if not element in d:
+        d.add(element)
+        return True
+    return False
+
 
 class Token_names(Enum):
     reservedword = auto()

@@ -75,23 +75,21 @@ class CFG:
             else:
                 while "" in rule.rest:
                     rule.rest.remove("")
-        # self._first_cache = {x: False for x in self.symbols}
         self._first_values = {x: set() for x in self.symbols}
+        self._follow_values = {x: set() for x in self.symbols}
 
     def calculate_firsts(self):
         keep_calculating = True
         while keep_calculating:
             keep_calculating = False
             for rule in self.rules:
-                # i = 0
-                # while i < len(rule.rest):
                 for f in rule.rest:
-                    # f = rule.rest[i]
-                    # print(self._first_values[Symbol("number")])
                     if isinstance(f, str):
-                        if f not in self._first_values[rule.origin]:
-                            self._first_values[rule.origin].add(f)
-                            keep_calculating = True
+                        # if f not in self._first_values[rule.origin]:
+                        #     self._first_values[rule.origin].add(f)
+                        #     keep_calculating = True
+                        keep_calculating = keep_calculating or add_if_not_already_added(
+                            f, self._first_values[rule.origin])
                         break
                     else:
                         if not self._first_values[f]:
@@ -100,27 +98,56 @@ class CFG:
                         for x in self._first_values[f]:
                             if x == "":
                                 no_epsilon = False
-                                # if i != len(rule.rest):
                                 if f != rule.rest[-1]:
                                     continue
-                            if x not in self._first_values[rule.origin]:
-                                self._first_values[rule.origin].add(x)
-                                keep_calculating = True
+                            # if x not in self._first_values[rule.origin]:
+                            #     self._first_values[rule.origin].add(x)
+                            #     keep_calculating = True
+                            keep_calculating = keep_calculating or add_if_not_already_added(
+                                x, self._first_values[rule.origin])
                         if no_epsilon:
                             break
-                        # i += 1
 
-    # def calculate_follows(self):
-    #     keep_calculating = True
-    #     while keep_calculating:
-    #         keep_calculating = False
-    #         for rule in self.rules:
-    #             for i in range(len(rule.rest)):
-    #                 f = rule.rest[i]
-                    
+    def calculate_follows(self):
+        self._follow_values[Symbol("e")].add("$")
+        keep_calculating = True
+        while keep_calculating:
+            keep_calculating = False
+            for rule in self.rules:
+                has_epsilon = ["" in self.first(x) if isinstance(
+                    x, Symbol) else False for x in rule.rest]
+                for i in range(len(rule.rest)):
+                    f = rule.rest[i]
+                    if isinstance(f, str):
+                        continue
+                    do = True
+                    while i + 1 < len(rule.rest) and (do or has_epsilon[i + 1]):
+                        do = False
+                        i += 1
+                        g = rule.rest[i]
+                        if isinstance(g, str):
+                            keep_calculating = keep_calculating or add_if_not_already_added(
+                                g, self._follow_values[f])
+                        else:
+                            for x in self.first(g) - {""}:
+                                keep_calculating = keep_calculating or add_if_not_already_added(
+                                    x, self._follow_values[f])
+                i = len(rule.rest) - 1
+                do = True
+                while i >= 0 and (do or has_epsilon[i + 1]):
+                    f = rule.rest[i]
+                    if isinstance(f, str):
+                        break
+                    for x in self._follow_values[rule.origin] - {""}:
+                        keep_calculating = keep_calculating or add_if_not_already_added(
+                            x, self._follow_values[f])
+                    i -= 1
 
     def first(self, symbol):
         return self._first_values[symbol]
+
+    def follow(self, symbol):
+        return self._follow_values[symbol]
 
     def __repr__(self):
         return "\n".join([str(x) for x in self.rules])
@@ -135,4 +162,6 @@ class CFG:
 # f: "(" e ")" | "id"
 # """)
 # c.calculate_firsts()
+# c.calculate_follows()
 # print(c._first_values)
+# print(c._follow_values)
