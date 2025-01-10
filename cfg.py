@@ -1,3 +1,5 @@
+from rich import print
+from sympy import symbols
 from assets import *
 CFG_FILE_PATH = "cfg.txt"
 CFG_RULES_STR = ""
@@ -34,6 +36,7 @@ class Rule:
 class CFG:
     def __init__(self, grammar_str: str):
         self.symbols = []
+        self.terminals = []
         symbol_names = set()
         self.rules = []
 
@@ -59,7 +62,9 @@ class CFG:
                         j = i
                         while not words[j].endswith('"'):
                             j += 1
-                        rule.rest.append(" ".join(words[i:j + 1])[1:-1])
+                        result = " ".join(words[i:j + 1])[1:-1]
+                        self.terminals.append(result)
+                        rule.rest.append(result)
                         i = j + 1
                     else:
                         if current == "":
@@ -78,7 +83,12 @@ class CFG:
         self._first_values = {x: set() for x in self.symbols}
         self._follow_values = {x: set() for x in self.symbols}
 
-    def calculate_firsts(self):
+        self._m = None
+        self._calculate_firsts()
+        self._calculate_follows()
+        self._create_parse_table()
+
+    def _calculate_firsts(self):
         keep_calculating = True
         while keep_calculating:
             keep_calculating = False
@@ -108,8 +118,8 @@ class CFG:
                         if no_epsilon:
                             break
 
-    def calculate_follows(self):
-        self._follow_values[Symbol("e")].add("$")
+    def _calculate_follows(self):
+        self._follow_values[Symbol("start")].add("$")
         keep_calculating = True
         while keep_calculating:
             keep_calculating = False
@@ -149,19 +159,59 @@ class CFG:
     def follow(self, symbol):
         return self._follow_values[symbol]
 
+    def _create_parse_table(self):
+        # rows = len(self.symbols)
+        # columns = len(self.terminals) + 1  # $
+        # M = [[[] for j in range(columns)] for i in range(rows)]
+        M = {s: {t: [] for t in self.terminals + ["$"]} for s in self.symbols}
+        for rule in self.rules:
+            fa = set()  # First(A)
+            f1 = rule.rest[0]
+            if isinstance(f1,str):
+                fa.add(f1)
+            else:
+                for i in range(len(rule.rest)):
+                    f = rule.rest[i]
+                    if isinstance(f, str):
+                        # if not f:
+                        #     fa.add(f)
+                        break
+                    fa |= self.first(f)
+                    if "" not in self.first(f):
+                        break
+            ein = "" in fa
+            if ein:
+                fa.remove("")
+            print(rule, fa, "==========")
+            for t in fa:
+                M[rule.origin][t].append(rule)
+            if ein:
+                for t in self.follow(rule.origin):
+                    M[rule.origin][t].append(rule)
+                if "$" in self.follow(rule.origin):
+                    M[rule.origin]["$"].append(rule)
+        self._m = M
+
+    @property
+    def parse_table(self):
+        return self._m
+
     def __repr__(self):
         return "\n".join([str(x) for x in self.rules])
 
 
 # c = CFG(CFG_RULES_STR)
 # print(c)
-# c = CFG("""e: t e'
-# e': "+" t e' | 
+# c = CFG("""start: t e'
+# e': "+" t e' |
 # t: f t'
-# t': "*" f t' | 
-# f: "(" e ")" | "id"
+# t': "*" f t' |
+# f: "(" start ")" | "id"
 # """)
 # c.calculate_firsts()
 # c.calculate_follows()
 # print(c._first_values)
 # print(c._follow_values)
+# print(c.terminals)
+# print(c.parse_table[Symbol("t")])
+# print(c.parse_table)
