@@ -1,5 +1,5 @@
 start: s n m
-s: "#include <reservedword>" s | 
+s: "#include" s | 
 n: "using namespace std;" | 
 m: "int main(){" t v "}"
 t: id t | l t | loop t | input t | output t | 
@@ -15,8 +15,8 @@ assign: "=" operation |
 expression: operation k operation
 k: "==" | ">=" | "<=" | "!="
 loop: "while(" expression "){" t "}"
-input: "cin>>identifier" f ";"
-f: ">>identifier" f | 
-output: "cout<<" c h ";"
+input: "cin" ">>" "identifier" f ";"
+f: ">>" "identifier" f | 
+output: "cout" "<<" c h ";"
 h: "<<" c h | 
 c: "number" | "string" | "identifier"
