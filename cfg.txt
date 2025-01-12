@@ -1,12 +1,12 @@
 start: s n m
 s: "#include" s | 
-n: "using namespace std;" | 
-m: "int main(){" t v "}"
+n: "using" "namespace" "std" ";" | 
+m: "int" "main" "(" ")" "{" t v "}"
 t: id t | l t | loop t | input t | output t | 
-v: "return 0;" | 
+v: "return" "number" ";" | 
 id: "int" l | "float" l
 l: "identifier" assign z
-z: ",identifier" assign z | ";"
+z: "," "identifier" assign z | ";"
 operation: "number" p | "identifier" p
 p: o w p | 
 o: "+" | "-" | "*"
@@ -14,7 +14,7 @@ w: "number" | "identifier"
 assign: "=" operation | 
 expression: operation k operation
 k: "==" | ">=" | "<=" | "!="
-loop: "while(" expression "){" t "}"
+loop: "while" "(" expression ")" "{" t "}"
 input: "cin" ">>" "identifier" f ";"
 f: ">>" "identifier" f | 
 output: "cout" "<<" c h ";"
