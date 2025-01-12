@@ -1,27 +1,31 @@
 from assets import Token_names
-from cfg import CFG, Symbol
+from cfg import CFG, Symbol, Rule
 
 
-def representing_value(token):
-    if Token_names[token[0]] in [Token_names.reservedword, Token_names.symbol]:
-        return token[1]
-    return token[0]
+def is_symbol_terminal(token):
+    return token[0] in [Token_names.reservedword.name, Token_names.symbol.name]
 
 
 def nonrecursive_predictive_parser(tokens: list, cfg: CFG):
     res = []
     it = iter(tokens)
-    a = representing_value(next(it))
+    n = next(it)
+    ist = is_symbol_terminal(n)
+    a = n[ist]
     stack = [Symbol("start")]
     while stack:
         x = stack.pop()
         if x == "":
             continue
         if x == a:
+            if not ist:
+                res.append(Rule(n[0], [n[1]]))
             try:
-                a = representing_value(next(it))
+                n = next(it)
+                ist = is_symbol_terminal(n)
+                a = n[ist]
             except StopIteration:
-                pass
+                break
         elif x in cfg.terminals:
             raise Exception("error type 1")
         elif not cfg.parse_table[x][a]:
