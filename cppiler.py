@@ -20,7 +20,11 @@ if __name__ == "__main__":
     token_tale.save_table()
     cfg = CFG(CFG_RULES_STR)
     cfg.save_parse_table()
-    productions = nonrecursive_predictive_parser(tokens, cfg)
+    try:
+        productions = nonrecursive_predictive_parser(tokens, cfg)
+    except SyntaxError as err:
+        print(err)
+        quit()
     tree = ParseTree(productions)
 
 

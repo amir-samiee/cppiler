@@ -18,6 +18,8 @@ def generate_patterns():
 
 def lex(code):
     position = 0
+    line = 1
+    column = 1
     tokens = []
     compiled_regex = generate_patterns()
 
@@ -27,10 +29,15 @@ def lex(code):
             for token_name, token_value in match.groupdict().items():
                 if token_value is not None:
                     if token_name != ren.whitespace.name:
-                        tokens.append((token_name, token_value))
+                        tokens.append((token_name, token_value, line, column))
                     position = match.end()
+                    line_breaks = token_value.count('\n')
+                    if line_breaks > 0:
+                        line += line_breaks
+                        column = len(token_value.split('\n')[-1]) + 1
+                    else:
+                        column += len(token_value)
                     break
         else:
-            raise ValueError(f'Invalid character at position {
-                             position}: {code[position]}')
+            raise ValueError(f'Invalid character at line {line}, column {column}: {code[position]}')
     return tokens

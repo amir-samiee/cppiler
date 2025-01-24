@@ -9,7 +9,7 @@ class TokenTable:
         grouped_tokens = defaultdict(list)
         token_table = []
 
-        for token_name, token_value in tokens:
+        for token_name, token_value, _, _ in tokens:
             grouped_tokens[token_name].append(token_value)
         for token_name in grouped_tokens:
             grouped_tokens[token_name].sort()

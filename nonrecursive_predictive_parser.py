@@ -27,8 +27,12 @@ def nonrecursive_predictive_parser(tokens: list, cfg: CFG):
             except StopIteration:
                 break
         elif top in cfg.terminals:
+            if top == ";":
+                raise SyntaxError(f"- SyntaxError: Missing ; in line {n[2]-1}")
             raise Exception("error type 1")
         elif not cfg.parse_table[top][token_value]:
+            if cfg.parse_table[top][";"]:
+                raise SyntaxError(f"- SyntaxError: Missing ; in line {n[2]-1}")
             raise Exception("error type 2")
         else:
             rule = cfg.parse_table[top][token_value][0]
