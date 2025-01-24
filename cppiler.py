@@ -1,5 +1,5 @@
 from parse_tree import ParseTree
-from nonrecursive_predictive_parser import nonrecursive_predictive_parser
+from npp import nonrecursive_predictive_parser
 from lexical_analyzer import lex
 from anytree import RenderTree
 import rich
@@ -26,6 +26,10 @@ if __name__ == "__main__":
         print(err)
         quit()
     tree = ParseTree(productions)
+    errors = tree.validate_type_mismatches()
+    for error in errors:
+        print(error)
+        quit()
 
 
     has_searched = False

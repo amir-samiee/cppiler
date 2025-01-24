@@ -26,25 +26,59 @@ class ParseTree:
                 return node
             queue.extend(node.children)
         return None
-    
-    def find_variable_definition(self, target_name):
-        node = self.BFS(target_name)
-        if node == None:
-            return f"No definition found for '{target_name}'."
-        id_node = node.parent
-        
-        while id_node.name != Symbol('id'):
-            id_node = id_node.parent
-        data_type = id_node.children[0].name
 
-        assignment_node = None
-        for sibling in node.parent.siblings:
-            if sibling.name == Symbol('assign'):
-                assignment_node = sibling
-        value = ";"
-        if '=' in [mynode.name for mynode in assignment_node.children]:
-            value_node = assignment_node.children[1].children[0].children[0]
-            value = f' = {value_node.name}' + value
-        
+    def validate_type_mismatches(self):
+        symbol_table = {}
+        errors = []
 
-        return data_type + ' ' + node.name + value
+        queue = deque([self.root])
+
+        while queue:
+            node = queue.popleft()
+
+            if node.name == Symbol("id"):
+                declared_type = None
+                variable_name = None
+
+                for child in node.children:
+                    if child.name in ["int", "float"]:
+                        declared_type = child.name
+                    elif child.name == Symbol("l"):
+                        for l_child in child.children:
+                            if l_child.name == "identifier":
+                                variable_name = l_child.children[0].name
+
+                if declared_type and variable_name:
+                    symbol_table[variable_name] = declared_type
+
+            if node.name == Symbol("assign"):
+                variable_name = None
+                assigned_type = None
+
+                parent = node.parent
+                if parent and parent.name == Symbol("l"):
+                    for sibling in parent.children:
+                        if sibling.name == "identifier":
+                            variable_name = sibling.children[0].name
+
+                for assign_child in node.children:
+                    if assign_child.name == Symbol("operation"):
+                        for operation_child in assign_child.children:
+                            if operation_child.name == "number":
+                                assigned_type = "float" if "." in operation_child.children[0].name else "int"
+                            elif operation_child.name == "identifier":
+                                assigned_type = symbol_table.get(operation_child.children[0].name, None)
+
+                if variable_name in symbol_table:
+                    declared_type = symbol_table[variable_name]
+                    if assigned_type and declared_type != assigned_type:
+                        errors.append(
+                            f"Error: Type mismatch in assignment to '{variable_name}': Cannot assign '{assigned_type}' to '{declared_type}'."
+                        )
+                else:
+                    errors.append(f"Error: Undeclared variable '{variable_name}' used in assignment.")
+
+            queue.extend(node.children)
+
+        return errors
+

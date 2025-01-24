@@ -26,16 +26,25 @@ def nonrecursive_predictive_parser(tokens: list, cfg: CFG):
                 token_value = n[ist]
             except StopIteration:
                 break
+
         elif top in cfg.terminals:
             if top == ";":
-                raise SyntaxError(f"- SyntaxError: Missing ; in line {n[2]-1}")
+                raise SyntaxError(f"Error: Missing ; in line {n[2]-1}")
             raise Exception("error type 1")
-        elif not cfg.parse_table[top][token_value]:
+        
+        elif not cfg.parse_table.get(top).get(token_value):
+        
             if cfg.parse_table[top][";"]:
-                raise SyntaxError(f"- SyntaxError: Missing ; in line {n[2]-1}")
+                raise SyntaxError(f"Error: Missing ; in line {n[2]-1}")
+        
+            elif top == Symbol("operation"):
+                if token_value not in ["number", "identifier"]:
+                    raise SyntaxError(f"Error: Invalid assignment value '{token_value}' at line {n[2]}, column {n[3]}.")
             raise Exception("error type 2")
+        
         else:
             rule = cfg.parse_table[top][token_value][0]
             res.append(rule)
             stack.extend(rule.rest[::-1])
+
     return res
