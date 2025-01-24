@@ -1,4 +1,7 @@
 from enum import Enum, auto
+import os
+import platform
+
 SAMPLE_CODE_FILE_PATH = "test.cpp"
 
 def add_if_not_already_added(element,d):
@@ -7,6 +10,11 @@ def add_if_not_already_added(element,d):
         return True
     return False
 
+def clear_screen():
+    if platform.system() == "Windows":
+        os.system('cls')
+    else:
+        os.system('clear')
 
 class Token_names(Enum):
     reservedword = auto()

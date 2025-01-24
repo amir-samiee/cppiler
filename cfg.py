@@ -187,14 +187,14 @@ class CFG:
     def parse_table(self):
         return self._m
 
-    def print_parse_table(self):
+    def save_parse_table(self):
         data = self.parse_table
         headers = data[Symbol("start")].keys()
         rows = []
         for symbol in data.keys():
             rows.append([symbol] + [data[symbol][header]
                                     for header in headers])
-        with open("table.txt", "w") as file:
+        with open("parse_table.txt", "w") as file:
             file.write(
                 str(tabulate(rows, headers=headers, tablefmt="grid")) + "\n")
 

@@ -1,4 +1,4 @@
 *.pdf
 test*.py
 __pycache__
-table.txt
+*_table.txt

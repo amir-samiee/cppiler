@@ -1,7 +1,5 @@
 from assets import Token_names as tkn, Re_names as ren
-from collections import defaultdict
 import re
-import hashlib
 
 def generate_patterns():
     token_specs = [
@@ -36,23 +34,3 @@ def lex(code):
             raise ValueError(f'Invalid character at position {
                              position}: {code[position]}')
     return tokens
-
-def calculate_hash(token_name, token_value):
-    value = f"{token_name}#{token_value}"
-    return hashlib.sha256(value.encode()).hexdigest()
-
-def create_token_table(tokens:list):
-    grouped_tokens = defaultdict(list)
-    token_table = []
-    
-    for token_name, token_value in tokens:
-        grouped_tokens[token_name].append(token_value)
-    for token_name in grouped_tokens:
-        grouped_tokens[token_name].sort()
-    for token_type in tkn:
-        token_name = token_type.name
-        if token_name in grouped_tokens:
-            for token_value in grouped_tokens[token_name]:
-                token_table.append(calculate_hash(token_name, token_value))
-
-    return token_table
