@@ -39,6 +39,7 @@ class CFG:
         symbol_names = set()
         self.rules = []
 
+        # O(1)
         def check_symbol(symbol):
             if symbol not in symbol_names:
                 symbol_names.add(symbol)
@@ -74,11 +75,12 @@ class CFG:
                         i += 1
                 self.rules.append(rule)
         for rule in self.rules:
-            if all(["" == x for x in rule.rest]):
-                rule.rest = [""]
-            else:
-                while "" in rule.rest:
-                    rule.rest.remove("")
+            for rule in self.rules:
+                if not any(rule.rest):
+                    rule.rest = [""]
+                else:
+                    rule.rest = [x for x in rule.rest if x != ""]
+
         self._first_values = {x: set() for x in self.symbols}
         self._follow_values = {x: set() for x in self.symbols}
 
@@ -87,16 +89,18 @@ class CFG:
         self._calculate_follows()
         self._create_parse_table()
 
-    def _calculate_firsts(self):
+    # O((n)*(r)*(s)*(t^2)) where:
+    # - n is the number of rules in self.rules
+    # - r is the average symbols on the rest side of rules
+    # - s is the total number of unique non-terminal symbols(variables) in the grammer
+    # - t is the total number of terminal symbols in the grammer
+    def _calculate_firsts(self): 
         keep_calculating = True
         while keep_calculating:
             keep_calculating = False
             for rule in self.rules:
                 for f in rule.rest:
                     if isinstance(f, str):
-                        # if f not in self._first_values[rule.origin]:
-                        #     self._first_values[rule.origin].add(f)
-                        #     keep_calculating = True
                         keep_calculating = keep_calculating or add_if_not_already_added(
                             f, self._first_values[rule.origin])
                         break
@@ -116,6 +120,7 @@ class CFG:
                     add_if_not_already_added(
                         "", self._first_values[rule.origin])
 
+    #O()
     def _calculate_follows(self):
         self._follow_values[Symbol("start")].add("$")
         keep_calculating = True
@@ -136,10 +141,11 @@ class CFG:
                             keep_calculating = keep_calculating or add_if_not_already_added(
                                 x, self._follow_values[f])
 
+    # O(k) where k is the length of symbols
     def first(self, symbols):
         if isinstance(symbols, Symbol):
             return self._first_values[symbols]
-        fs = set()  # First(symbols)
+        fs = set()
         f1 = symbols[0]
         if isinstance(f1, str):
             fs.add(f1)
@@ -156,13 +162,15 @@ class CFG:
                 fs.add("")
         return fs
 
+    # O(1)
     def follow(self, symbol):
         return self._follow_values[symbol]
 
+    # O()
     def _create_parse_table(self):
         M = {s: {t: [] for t in self.terminals + ["$"]} for s in self.symbols}
         for rule in self.rules:
-            fa = self.first(rule.rest)  # First(A)
+            fa = self.first(rule.rest)
             ein = "" in fa
             if ein:
                 fa.remove("")

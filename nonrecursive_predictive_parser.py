@@ -11,27 +11,27 @@ def nonrecursive_predictive_parser(tokens: list, cfg: CFG):
     it = iter(tokens)
     n = next(it)
     ist = is_symbol_terminal(n)
-    a = n[ist]
+    token_value = n[ist]
     stack = [Symbol("start")]
     while stack:
-        x = stack.pop()
-        if x == "":
+        top = stack.pop()
+        if top == "":
             continue
-        if x == a:
+        if top == token_value:
             if not ist:
                 res.append(Rule(n[0], [n[1]]))
             try:
                 n = next(it)
                 ist = is_symbol_terminal(n)
-                a = n[ist]
+                token_value = n[ist]
             except StopIteration:
                 break
-        elif x in cfg.terminals:
+        elif top in cfg.terminals:
             raise Exception("error type 1")
-        elif not cfg.parse_table[x][a]:
+        elif not cfg.parse_table[top][token_value]:
             raise Exception("error type 2")
         else:
-            rule = cfg.parse_table[x][a][0]
+            rule = cfg.parse_table[top][token_value][0]
             res.append(rule)
             stack.extend(rule.rest[::-1])
     return res

@@ -8,7 +8,7 @@ def generate_patterns():
         (tkn.reservedword.name,
          r'#include|\b(int|float|void|return|if|while|cin|cout|continue|break|using|iostream|namespace|std|main)\b'),
         (tkn.identifier.name, r'[a-zA-Z][a-zA-Z0-9]*'),
-        (tkn.number.name, r'\d+'),
+        (tkn.number.name, r'\d+(\.\d+)?'),
         (tkn.string.name, r'"([^"]*)"'),
         (tkn.symbol.name,
          r'[()\[\]\{\},;]|(\+|-|\*|/|==|!=|<=|>=|<<|>>|=|\|\||&&|<|>)'),
