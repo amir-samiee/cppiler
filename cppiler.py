@@ -31,18 +31,18 @@ if __name__ == "__main__":
         print(error)
         quit()
 
-
-    has_searched = False
     searching_variable = ""
     while True:
+        
         clear_screen()
+        
         for pre, fill, node in RenderTree(tree.root):
             rich.print(f"{pre}{node.name}")
         print('\n')
-        if has_searched:
+
+        if not searching_variable:
             print(tree.find_variable_definition(searching_variable))
-            pass
+        
         searching_variable = input("Enter a variable to find the first definition for (0 => quit):")
         if searching_variable == '0':
             quit()
-        has_searched = bool(searching_variable)
