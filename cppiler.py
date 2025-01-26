@@ -1,5 +1,5 @@
 from parse_tree import ParseTree
-from npp import nonrecursive_predictive_parser
+from nrpp import nonrecursive_predictive_parser
 from lexical_analyzer import lex
 from anytree import RenderTree
 import rich
@@ -18,6 +18,7 @@ if __name__ == "__main__":
     tokens = lex(code)
     token_tale = TokenTable(tokens)
     token_tale.save_table()
+    
     cfg = CFG(CFG_RULES_STR)
     cfg.save_parse_table()
     try:
@@ -25,20 +26,23 @@ if __name__ == "__main__":
     except SyntaxError as err:
         print(err)
         quit()
+
     tree = ParseTree(productions)
+    errors = tree.find_misstype()
+    if errors:
+        for error in errors:
+            print(error[0])
+        quit()
 
     searching_variable = ""
-    while True:
-        
+    while True:    
         clear_screen()
-        
         for pre, fill, node in RenderTree(tree.root):
             rich.print(f"{pre}{node.name}")
         print('\n')
 
         if searching_variable:
             print(tree.first_definition(searching_variable))
-        
         searching_variable = input("Enter a variable to find the first definition for (0 => quit):")
         if searching_variable == '0':
             quit()
