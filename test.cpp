@@ -6,7 +6,7 @@ int main(){
     while (t >= 0){
         cin>>x;
         t = t - 1;
-        s = s+x- 1 * 3;
+        s = s - 1 * 3;
     }
     cout<<"sum="<<s;
     return 0;

@@ -97,11 +97,11 @@ class ParseTree:
     def first_definition(self, identifier):
         if not identifier:
             return identifier
-        data_type, value = self.values[identifier][0]
+        data_type, value, line = self.values[identifier][0]
         definition = data_type + " " + identifier
         if value:
             definition += " = " + value
-        return definition + ";"
+        return f"First definition of variable '{identifier}': {definition}; (line {line})"
 
     # Time Complexity: O(e × d × c),
     # where:
