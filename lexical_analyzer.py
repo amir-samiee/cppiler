@@ -1,6 +1,7 @@
 from assets import Token_names as tkn, Re_names as ren
 import re
 
+# Time Complexity: O(n), where n is the total length of all regex patterns in `token_specs`.
 def generate_patterns():
     token_specs = [
         (tkn.reservedword.name,
@@ -16,6 +17,11 @@ def generate_patterns():
     master_pattern = '|'.join(f'(?P<{pair[0]}>{pair[1]})' for pair in token_specs)
     return re.compile(master_pattern)
 
+# Time Complexity: O(m × (n + k)),
+# where:
+# - m is the number of tokens in `code`.
+# - n is the total length of all regex patterns in `token_specs`.
+# - k is the average length of a token.
 def lex(code):
     position = 0
     line = 1
