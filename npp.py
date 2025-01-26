@@ -19,7 +19,7 @@ def nonrecursive_predictive_parser(tokens: list, cfg: CFG):
             continue
         if top == token_value:
             if not ist:
-                res.append(Rule(n[0], [n[1]]))
+                res.append((Rule(n[0], [n[1]]), n[2]))
             try:
                 n = next(it)
                 ist = is_symbol_terminal(n)
@@ -44,7 +44,7 @@ def nonrecursive_predictive_parser(tokens: list, cfg: CFG):
         
         else:
             rule = cfg.parse_table[top][token_value][0]
-            res.append(rule)
+            res.append((rule, n[2]))
             stack.extend(rule.rest[::-1])
 
     return res

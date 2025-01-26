@@ -5,13 +5,14 @@ from collections import defaultdict
 
 class ParseTree:
     def __init__(self, production_sequence: list):
-        root = Node(Symbol("start"))
+        root = Node(Symbol("start"), line=1)
         stack = [root]
         i = 0
         while stack:
             x = stack.pop()
-            psr = [Node(y, parent=x) if y != "" else Node("epsilon", parent=x)
-                   for y in production_sequence[i].rest]
+            rule, line = production_sequence[i]
+            psr = [Node(y, parent=x, line=line) if y != "" else Node("epsilon", parent=x, line=line)
+                   for y in rule.rest]
             for t in psr[::-1]:
                 if isinstance(t.name, Symbol) or t.name in [tk.identifier.name, tk.number.name, tk.string.name]:
                     stack.append(t)
@@ -80,3 +81,6 @@ class ParseTree:
         if value:
             defenition += " = " + value
         return defenition + ";"
+    
+    def find_misstype(self):
+        pass
