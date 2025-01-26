@@ -101,7 +101,7 @@ class ParseTree:
                 tmp = self.values.get(var)
                 if tmp == None:
                     errors.append((
-                        f"not declared", tmp[2])
+                        f"Error: Variable '{var}' is not declared at line {tmp[2]}.", tmp[2])
                     )
                     return None
                 if tmp[0][0] == "float":
