@@ -26,10 +26,6 @@ if __name__ == "__main__":
         print(err)
         quit()
     tree = ParseTree(productions)
-    errors = tree.validate_type_mismatches()
-    for error in errors:
-        print(error)
-        quit()
 
     searching_variable = ""
     while True:
@@ -40,8 +36,8 @@ if __name__ == "__main__":
             rich.print(f"{pre}{node.name}")
         print('\n')
 
-        if not searching_variable:
-            print(tree.find_variable_definition(searching_variable))
+        if searching_variable:
+            print(tree.first_definition(searching_variable))
         
         searching_variable = input("Enter a variable to find the first definition for (0 => quit):")
         if searching_variable == '0':

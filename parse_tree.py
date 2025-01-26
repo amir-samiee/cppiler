@@ -1,7 +1,7 @@
 from assets import Token_names as tk
 from cfg import Symbol
 from anytree import Node
-from collections import deque
+from collections import defaultdict
 
 class ParseTree:
     def __init__(self, production_sequence: list):
@@ -17,68 +17,66 @@ class ParseTree:
                     stack.append(t)
             i += 1
         self.root = root
+        self.variables, self.values = self.dfs_traversal()
+
+    def extract_identifiers_and_values(self, node):
+        results = []
+
+        def traverse_L(current_node):
+            if not current_node:
+                return
+
+            identifier = None
+            value = None
+
+            for child in current_node.children:
+                if child.name == "identifier":
+                    identifier = child.children[0].name
+                elif child.name == Symbol("assign"):
+                    if len(child.children) == 1:
+                        value = None
+                    else:
+                        for assign_child in child.children:
+                            if assign_child.name == Symbol("operation"):
+                                for operation_child in assign_child.children:
+                                    if operation_child.name == "number":
+                                        value = operation_child.children[0].name
+                                    elif operation_child.name == "identifier":
+                                        value = operation_child.children[0].name
+
+            if identifier:
+                results.append((identifier, value if value else None))
+
+            for child in current_node.children:
+                if child.name == Symbol("z"):
+                    traverse_L(child)
+
+        traverse_L(node)
+        return results
+
+
+    def dfs_traversal(self):
+        variables = []
+        values = defaultdict(list)
+        stack = [self.root]
+
+        while stack:
+            top = stack.pop()
+            if top.name == Symbol("id"):
+                data_type = top.children[0].name
+                key_values = self.extract_identifiers_and_values(top.children[1])
+                for key, value in key_values:
+                    variables.append(key)
+                    values[key].append((data_type, value))
+            for child in reversed(top.children):
+                stack.append(child)
+        return variables, values
     
-    def BFS(self, target_name):
-        queue= deque([self.root])
-        while queue:
-            node = queue.popleft()
-            if node.name == target_name:
-                return node
-            queue.extend(node.children)
-        return None
-
-    def validate_type_mismatches(self):
-        symbol_table = {}
-        errors = []
-
-        queue = deque([self.root])
-
-        while queue:
-            node = queue.popleft()
-
-            if node.name == Symbol("id"):
-                declared_type = None
-                variable_name = None
-
-                for child in node.children:
-                    if child.name in ["int", "float"]:
-                        declared_type = child.name
-                    elif child.name == Symbol("l"):
-                        for l_child in child.children:
-                            if l_child.name == "identifier":
-                                variable_name = l_child.children[0].name
-
-                if declared_type and variable_name:
-                    symbol_table[variable_name] = declared_type
-
-            if node.name == Symbol("assign"):
-                variable_name = None
-                assigned_type = None
-
-                parent = node.parent
-                if parent and parent.name == Symbol("l"):
-                    for sibling in parent.children:
-                        if sibling.name == "identifier":
-                            variable_name = sibling.children[0].name
-
-                for assign_child in node.children:
-                    if assign_child.name == Symbol("operation"):
-                        for operation_child in assign_child.children:
-                            if operation_child.name == "number":
-                                assigned_type = "float" if "." in operation_child.children[0].name else "int"
-                            elif operation_child.name == "identifier":
-                                assigned_type = symbol_table.get(operation_child.children[0].name, None)
-
-                if variable_name in symbol_table:
-                    declared_type = symbol_table[variable_name]
-                    if assigned_type and declared_type != assigned_type:
-                        errors.append(
-                            f"Error: Type mismatch in assignment to '{variable_name}': Cannot assign '{assigned_type}' to '{declared_type}'."
-                        )
-                else:
-                    errors.append(f"Error: Undeclared variable '{variable_name}' used in assignment.")
-
-            queue.extend(node.children)
-
-        return errors
-
+    def first_definition(self, identifier):
+        if not identifier:
+            return identifier
+        data_type, value = self.values[identifier][0]
+        defenition = data_type + " " + identifier
+        if value:
+            defenition += " = " + value
+        return defenition + ";"
