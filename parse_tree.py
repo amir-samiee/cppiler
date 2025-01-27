@@ -111,14 +111,14 @@ class ParseTree:
     def find_misstype(self):
         errors = []
 
-        def evaluate_expression(exp: str):  # O(d × c)
+        def evaluate_expression(exp: str, line):  # O(d × c)
             values = list(filter(lambda x: x not in "+-*", exp.split()))  # O(c)
             vars = list(filter(lambda x: not x.isdigit() and '.' not in x, values))  # O(d)
             data_type = "int"
             for var in vars:  # O(d)
                 tmp = self.values.get(var)
                 if tmp is None:
-                    errors.append((f"Error: Variable '{var}' is not declared at line {tmp[2]}.", tmp[2]))
+                    errors.append((f"- Error: Variable '{var}' is not declared at line {line}.", line))
                     return None
                 if tmp[0][0] == "float":
                     data_type = "float"
@@ -133,8 +133,8 @@ class ParseTree:
                 declared_type = assignment[0]
                 assigned_type = declared_type
                 if assignment[1]:
-                    assigned_type = evaluate_expression(assignment[1])  # O(d × c)
-                if declared_type != assigned_type:
+                    assigned_type = evaluate_expression(assignment[1], assignment[2])  # O(d × c)
+                if declared_type != assigned_type and assigned_type is not None:
                     errors.append((
                         f"- Error: Cannot assign '{assigned_type}' to '{declared_type}' variable '{key}' at line {assignment[2]}.", assignment[2]
                     ))
