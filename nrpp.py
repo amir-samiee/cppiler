@@ -58,7 +58,7 @@ def nonrecursive_predictive_parser(tokens: list, cfg: CFG):
 
         # Case 4: Valid rule is found for the non-terminal.
         else:
-            rule = cfg.parse_table[top][token_value][0]  # O(d)
+            rule = cfg.parse_table[top][token_value]  # O(d)
             res.append((rule, n[2]))  # O(1)
             stack.extend(rule.rest[::-1])  # O(w), where `w` is the length of `rule.rest`.
 

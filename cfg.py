@@ -26,7 +26,7 @@ class Rule:
         self.rest = rest
 
     def __eq__(self, other):
-        return self.origin == other.origin and self.rest == other.rest
+        return isinstance(other, Rule) and self.origin == other.origin and self.rest == other.rest
 
     def __repr__(self):
         return f"{self.origin} -> {" ".join([str(x) if isinstance(x, Symbol) else x for x in self.rest])}"
@@ -145,19 +145,20 @@ class CFG:
 
     # Time Complexity: O(v × t)
     def _create_parse_table(self):
-        M = {s: {t: [] for t in self.terminals + ["$"]} for s in self.symbols}  # O(v × t)
+        M = {s: {t: None for t in self.terminals +
+                 ["$"]} for s in self.symbols}  # O(v × t)
         for rule in self.rules:  # O(r)
             fa = self.first(rule.rest)  # O(w × t)
             ein = "" in fa
             if ein:
                 fa.remove("")
             for t in fa:  # O(t)
-                M[rule.origin][t].append(rule)
+                M[rule.origin][t] = rule
             if ein:
                 for t in self.follow(rule.origin):  # O(v)
-                    M[rule.origin][t].append(rule)
+                    M[rule.origin][t] = rule
                 if "$" in self.follow(rule.origin):
-                    M[rule.origin]["$"].append(rule)
+                    M[rule.origin]["$"] = rule
         self._m = M
 
     # Time Complexity: O(w × v)
