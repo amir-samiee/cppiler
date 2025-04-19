@@ -37,6 +37,7 @@ if __name__ == "__main__":
     searching_variable = ""
     while True:    
         clear_screen()
+        rich.print(productions)
         for pre, fill, node in RenderTree(tree.root):
             rich.print(f"{pre}{node.name}")
         print('\n')
